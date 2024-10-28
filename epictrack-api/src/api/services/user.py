@@ -56,7 +56,11 @@ class UserService:
         filtered_groups = []
 
         for group in groups:
-            current_app.logger.info(f"group: {group}")
+            # For some reason we get all the groups from keycloak instead of just requesting the
+            # TRACK group. So we need to filter out the groups that are not TRACK based, otherwise
+            # we will get all the groups in the system.
+            if group.get("name") != "TRACK":
+                continue
 
             # Check if the group has sub-groups by looking at the "subGroupCount" attribute
             if group.get("subGroupCount", 0) > 0:
