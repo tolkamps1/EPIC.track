@@ -27,9 +27,21 @@ const RecentStatus = () => {
     setStatus,
     setShowApproveStatusDialog,
   } = React.useContext(StatusContext);
+
+  // These are used in conjunction with /restricted/index.tsx for permission control.
   const { team } = React.useContext(WorkplanContext);
+  const activeTeam = team?.filter((member) => member.is_active);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const isTeamMember = team?.some((member) => member.staff.email === email);
+  const rolesArray = [
+    ROLES.RESPONSIBLE_EPD,
+    ROLES.TEAM_LEAD,
+    ROLES.TEAM_CO_LEAD,
+  ];
+  const userHasRole = activeTeam?.some(
+    (member) =>
+      member.staff.email === email && rolesArray.includes(member.role.name)
+  );
 
   return (
     <GrayBox
@@ -137,7 +149,7 @@ const RecentStatus = () => {
         <Restricted
           allowed={[statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT]}
           errorProps={{ disabled: true }}
-          exception={!statuses[0].is_approved && isTeamMember}
+          exception={(!statuses[0].is_approved && isTeamMember) || userHasRole}
         >
           <Button
             startIcon={<PencilEditIcon />}
