@@ -287,7 +287,15 @@ export default function WorkForm({
   }, [workTypeId, projectId, projects, workTypes]);
 
   React.useEffect(() => {
-    setValue("title", `${titlePrefix}${simple_title}`);
+    if (simple_title) {
+      setValue("title", `${titlePrefix}${simple_title}`);
+    } else {
+      // If simple_title is not set, remove the hanging separator
+      const trimmedPrefix = titlePrefix.endsWith(titleSeparator)
+        ? titlePrefix.slice(0, -titleSeparator.length)
+        : titlePrefix;
+      setValue("title", trimmedPrefix);
+    }
   }, [titlePrefix, simple_title]);
 
   const handleProjectChange = async (id: string) => {
