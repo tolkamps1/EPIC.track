@@ -953,17 +953,20 @@ class EAResourceForeCastReport(ReportFactory):
         quarter1, remaining = divmod(report_start_date.month, 3)
         if remaining > 0:
             quarter1 += 1
+        q1_year = report_start_date.year
         if quarter1 == 4:
             quarter2 = 1
+            q2_year = q1_year + 1
         else:
             quarter2 = quarter1 + 1
+            q2_year = q1_year
         styles = []
         cell_widths = []
         section_headings = [
-            f"{report_date.year} Q{quarter1}",
+            f"{q1_year} Q{quarter1}",
             "",
             "",
-            f"{self.end_date.year} Q{quarter2}",
+            f"{q2_year} Q{quarter2}",
         ]
         styles.append(("SPAN", (cell_index, 0), (cell_index + 2, 0)))
         styles.append(
