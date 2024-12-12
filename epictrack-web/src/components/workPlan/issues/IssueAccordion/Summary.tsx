@@ -9,7 +9,7 @@ import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
-import { Else, If, Then, When } from "react-if";
+import { Else, If, Switch, Case, Then, When, Default } from "react-if";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { IssuesContext } from "../IssuesContext";
@@ -41,14 +41,17 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
             <When condition={issue.is_high_priority}>
               <ETChip highPriority label="High Profile" />
             </When>
-            <If condition={issue.is_active}>
-              <Then>
+            <Switch>
+              <Case condition={issue.is_resolved}>
+                <ETChip resolved label="Resolved" />
+              </Case>
+              <Case condition={issue.is_active}>
                 <ETChip active label="Active" />
-              </Then>
-              <Else>
+              </Case>
+              <Default>
                 <ETChip inactive label="Inactive" />
-              </Else>
-            </If>
+              </Default>
+            </Switch>
           </Stack>
         </AccordionSummaryItem>
       </Grid>

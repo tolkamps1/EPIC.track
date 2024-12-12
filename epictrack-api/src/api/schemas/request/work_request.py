@@ -224,6 +224,11 @@ class WorkIssuesParameterSchema(RequestBodyParameterSchema):
         description="Flag indicating whether the issue is of high priority",
     )
 
+    is_resolved: bool = fields.Bool(
+        default=False,
+        description="Flag indicating whether the issue is resolved",
+    )
+
     start_date = fields.DateTime(
         metadata={"description": "Start date for the issue"}, required=False
     )
