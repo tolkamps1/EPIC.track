@@ -1,4 +1,10 @@
-import { ROLES } from "../../constants/application-constant";
+import {
+  ROLES,
+  ISSUES_STALENESS_THRESHOLD,
+  StalenessEnum,
+} from "../../constants/application-constant";
+import moment from "moment";
+import dateUtils from "../../utils/dateUtils";
 import { useContext } from "react";
 import { useAppSelector } from "hooks";
 import { WorkplanContext } from "./WorkPlanContext";
@@ -29,4 +35,32 @@ export const useUserHasRole = () => {
     (member) =>
       member.staff.email === email && rolesArray.includes(member.role.name)
   );
+};
+
+// Helper function to calculate staleness
+export const calculateStaleness = (issue: {
+  updates: { posted_date: string }[];
+  type?: string;
+}) => {
+  const now = moment();
+  // Check if there are no updates
+  if (!issue.updates || issue.updates.length === 0) {
+    return StalenessEnum.GOOD; // No update, consider it "GOOD"
+  }
+
+  // Calculate the difference in days from the latest update
+  const diffDays = dateUtils.diff(
+    now.toLocaleString(),
+    issue.updates[0]?.posted_date,
+    "days"
+  );
+
+  // Determine the staleness level
+  if (diffDays > ISSUES_STALENESS_THRESHOLD.StalenessEnum.CRITICAL) {
+    return StalenessEnum.CRITICAL;
+  } else if (diffDays > ISSUES_STALENESS_THRESHOLD.StalenessEnum.WARN) {
+    return StalenessEnum.WARN;
+  } else {
+    return StalenessEnum.GOOD;
+  }
 };

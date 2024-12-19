@@ -29,13 +29,11 @@ class IssueService {
 
     try {
       const response = await http.PatchRequest(query, JSON.stringify(data));
-      console.warn("response data:", response); // Log the returned data
-      return response; // Return the response after logging it
+      return response;
     } catch (error) {
-      console.error("Error in editIssue:", error); // Log any errors
-      throw error; // Rethrow the error after logging
+      console.error("Error in editIssue:", error);
+      throw error;
     }
-    // return await http.PatchRequest(query, JSON.stringify(data));
   }
 
   async editIssueUpdate(

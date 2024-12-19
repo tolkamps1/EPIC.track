@@ -54,12 +54,11 @@ const PatchRequest = <T>(url: string, data = {}) => {
       },
     })
     .then((response) => {
-      // console.warn("PatchRequest - Response:", response); // Log the response
       return response;
     })
     .catch((error) => {
-      console.error("PatchRequest - Error:", error); // Log the error
-      throw error; // Ensure the error propagates
+      console.error("PatchRequest - Error:", error);
+      throw error;
     });
 };
 

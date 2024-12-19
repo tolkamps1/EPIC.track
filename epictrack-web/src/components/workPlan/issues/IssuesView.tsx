@@ -3,15 +3,17 @@ import AddIcon from "@mui/icons-material/Add";
 import NoDataEver from "../../shared/NoDataEver";
 import { IssuesContext } from "./IssuesContext";
 import IssuesViewSkeleton from "./IssuesViewSkeleton";
-import { Else, If, Then } from "react-if";
+import { When } from "react-if";
 import IssueAccordion from "./IssueAccordion";
-import { Button, Grid } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
 import { WorkIssue } from "../../../models/Issue";
 import IssueDialogs from "./Dialogs";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { useAppSelector } from "hooks";
-import { ROLES } from "constants/application-constant";
+import { ROLES, StalenessEnum } from "constants/application-constant";
+import { calculateStaleness } from "../utils";
+import WarningBox from "../../shared/warningBox";
 
 const IssuesView = () => {
   const { issues, team } = React.useContext(WorkplanContext) as {
@@ -26,46 +28,30 @@ const IssuesView = () => {
   const canCreate = hasPermission({ roles, allowed: [ROLES.CREATE] });
   const isTeamMember = team?.some((member) => member.staff.email === email);
 
-  const lastInteractedIssue = React.useRef<number | null>(null);
-
-  // Sorting function
   const sortIssues = (issues: WorkIssue[]): WorkIssue[] => {
     return [...issues].sort((a, b) => {
-      // First, sort by resolved status
       if (a.is_resolved !== b.is_resolved) {
         return a.is_resolved ? 1 : -1; // Unresolved items come first
       }
-      // Then, sort by date
       if (a.start_date > b.start_date) {
         return -1;
       }
       if (a.start_date < b.start_date) {
         return 1;
       }
-      return 0; //Equal
+      return 0;
     });
   };
 
-  // Mapping function
-  const mapIssues = (
-    issues: WorkIssue[],
-    lastInteractedIssue: React.MutableRefObject<number | null>
-  ) => {
-    return issues.map((issue, index) => (
-      <Grid key={`accordion-${issue.id}`} item xs={12}>
-        <IssueAccordion
-          issue={issue}
-          defaultOpen={
-            lastInteractedIssue.current
-              ? issue.id === lastInteractedIssue.current
-              : index === 0
-          }
-          onInteraction={() => {
-            lastInteractedIssue.current = issue.id;
-          }}
-        />
-      </Grid>
-    ));
+  const mapIssues = (issues: WorkIssue[]) => {
+    return issues.map((currentIssue, index) => {
+      const staleness = calculateStaleness(currentIssue);
+      return (
+        <Grid key={`accordion-${currentIssue.id}`} item xs={12}>
+          <IssueAccordion issue={currentIssue} staleness={staleness} />
+        </Grid>
+      );
+    });
   };
 
   const sortedIssues = sortIssues(issues);
@@ -76,39 +62,51 @@ const IssuesView = () => {
 
   return (
     <>
-      <If condition={issues.length === 0}>
-        <Then>
-          <NoDataEver
-            title="You don't have any Issues yet"
-            subTitle="Start adding your Issues"
-            addNewButtonText="Add Issue"
-            onAddNewClickHandler={() => setCreateIssueFormIsOpen(true)}
-            addButtonProps={{
-              disabled: !canCreate && !isTeamMember,
-            }}
+      <When condition={issues.length === 0}>
+        <NoDataEver
+          title="You don't have any Issues yet"
+          subTitle="Start adding your Issues"
+          addNewButtonText="Add Issue"
+          onAddNewClickHandler={() => setCreateIssueFormIsOpen(true)}
+          addButtonProps={{
+            disabled: !canCreate && !isTeamMember,
+          }}
+        />
+      </When>
+      <When
+        condition={
+          "staleness === StalenessEnum.CRITICAL" ||
+          "staleness === StalenessEnum.WARN"
+        }
+      >
+        <Box sx={{ paddingBottom: "16px" }}>
+          <WarningBox
+            title="One of the Work issues is out of date"
+            subTitle="Please provide an update where needed"
+            isTitleBold={true}
           />
-        </Then>
-        <Else>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                exception={isTeamMember}
-                errorProps={{ disabled: true }}
+        </Box>
+      </When>
+      <When condition={issues.length > 0}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Restricted
+              allowed={[ROLES.CREATE]}
+              exception={isTeamMember}
+              errorProps={{ disabled: true }}
+            >
+              <Button
+                variant="contained"
+                onClick={() => setCreateIssueFormIsOpen(true)}
+                startIcon={<AddIcon />}
               >
-                <Button
-                  variant="contained"
-                  onClick={() => setCreateIssueFormIsOpen(true)}
-                  startIcon={<AddIcon />}
-                >
-                  Issue
-                </Button>
-              </Restricted>
-            </Grid>
-            {mapIssues(sortedIssues, lastInteractedIssue)}
+                Issue
+              </Button>
+            </Restricted>
           </Grid>
-        </Else>
-      </If>
+          {mapIssues(sortedIssues)}
+        </Grid>
+      </When>
       <IssueDialogs />
     </>
   );

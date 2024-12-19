@@ -14,16 +14,37 @@ const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
 const IssueAccordion = ({
   issue,
-  defaultOpen = true,
+  staleness,
+  defaultOpen = false,
   onInteraction = () => {
     return;
   },
 }: {
   issue: WorkIssue;
+  staleness?: string;
   defaultOpen?: boolean;
   onInteraction?: () => void;
 }) => {
   const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
+
+  const iconStyles = React.useMemo(() => {
+    if (staleness === "CRITICAL") {
+      return {
+        fill: Palette.error.dark,
+        background: Palette.error.bg.light,
+      };
+    }
+    if (staleness === "WARN") {
+      return {
+        fill: Palette.secondary.dark,
+        background: Palette.secondary.bg.light,
+      };
+    }
+    return {
+      fill: Palette.success.dark,
+      background: Palette.success.bg.light,
+    };
+  }, [staleness]);
 
   return (
     <ETAccordion
@@ -31,7 +52,6 @@ const IssueAccordion = ({
       expanded={expanded}
       onChange={() => {
         setExpanded(!expanded);
-
         if (!expanded) {
           onInteraction();
         }
@@ -42,9 +62,11 @@ const IssueAccordion = ({
         expandIcon={
           <ExpandIcon
             data-cy={`${issue.id}-expand-icon`}
-            sx={{
-              fill: Palette.primary.main,
-              cursor: "pointer",
+            className=""
+            style={{
+              ...iconStyles,
+              width: "20",
+              height: "20",
             }}
           />
         }
