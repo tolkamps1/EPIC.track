@@ -73,6 +73,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "event_name",
             "notes",
             "next_pecp_number_of_days",
+            "next_pecp_phase_name",
             "amendment_title",
             "work_type_id",
             "work_type"
@@ -312,6 +313,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.actual_date,
                 ).label("next_pecp_date"),
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
+                next_pecp_query.c.phase_name.label("next_pecp_phase_name"),
                 func.coalesce(next_pecp_query.c.number_of_days, 0).label("next_pecp_number_of_days"),
             )
         )
@@ -324,6 +326,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         #   - If successful, extracts and concatenates text from JSON blocks.
         #   - Logs a warning if JSON parsing fails.
         for result in results_dict:
+            result['next_pecp_phase_name'] = result.get('next_pecp_phase_name', None)
             if 'next_pecp_short_description' in result and result['next_pecp_short_description'] is not None:
                 current_app.logger.debug(f"Next PECP Short Description: {result['next_pecp_short_description']}")
                 try:
@@ -353,6 +356,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             item_dict = item._asdict()
             item_dict['work_issues'] = work_issues
             item_dict['next_pecp_number_of_days'] = item.next_pecp_number_of_days
+            item_dict['next_pecp_phase_name'] = item.next_pecp_phase_name
             item_dict['notes'] = ""
 
             # go through all the work issues, find the update and add the description to the issue
@@ -554,6 +558,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             db.session.query(
                 Event,
                 Event.number_of_days,
+                WorkPhase.name.label("phase_name"),
             )
             .join(
                 next_pcp_min_date_query,
@@ -561,6 +566,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     next_pcp_min_date_query.c.work_id == Event.work_id,
                     func.coalesce(Event.actual_date, Event.anticipated_date) == next_pcp_min_date_query.c.min_pcp_date,
                 ),
+            )
+            .join(
+                EventConfiguration,
+                EventConfiguration.id == Event.event_configuration_id
+            )
+            .join(
+                WorkPhase,
+                EventConfiguration.work_phase_id == WorkPhase.id
             )
             .filter(
                 Event.event_configuration_id.in_(pecp_configuration_ids),

@@ -81,6 +81,7 @@ export default function AnticipatedEAOSchedule() {
       if (reportData.status === 200) {
         const reports = reportData.data as ReportData;
         setReports(reports.data);
+        console.info("ReportData:", reports);
       }
 
       if (reportData.status === 204) {
@@ -211,6 +212,7 @@ export default function AnticipatedEAOSchedule() {
             .map((group, _) => {
               const groupName = group.group;
               const items = group.items;
+              console.info("group:", group);
               return (
                 <>
                   <Accordion
@@ -226,7 +228,7 @@ export default function AnticipatedEAOSchedule() {
                     </AccordionSummary>
                     <AccordionDetails>
                       {items.map((item, itemIndex) => {
-                        console.log(item);
+                        console.log("item:", item);
                         return (
                           <Accordion key={itemIndex} elevation={0}>
                             <AccordionSummary
