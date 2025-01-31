@@ -71,7 +71,7 @@ export default function ResourceForecast() {
       (p) => !hiddenColumns.includes(p.id)
     );
     setColumnFilters(filteredColumnFilters);
-  }, [columnVisibility, setColumnFilters]);
+  }, [columnFilters, columnVisibility, setColumnFilters]);
 
   const exportToCsv = React.useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
@@ -190,7 +190,6 @@ export default function ResourceForecast() {
   const workLeadFilter = filterFn("work_lead");
   const epdFilter = filterFn("responsible_epd");
   const teamFilter = filterFn("eao_team");
-  const cairtLeadFilter = filterFn("cairt_lead");
 
   const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
@@ -302,12 +301,6 @@ export default function ResourceForecast() {
         filterSelectOptions: epdFilter,
       },
       {
-        accessorKey: "cairt_lead",
-        header: "FN CAIRT Lead",
-        filterVariant: "select",
-        filterSelectOptions: cairtLeadFilter,
-      },
-      {
         accessorKey: "eao_team",
         header: "Lead's Team",
         filterVariant: "select",
@@ -344,7 +337,6 @@ export default function ResourceForecast() {
     ],
     [
       setMonthColumns,
-      cairtLeadFilter,
       eaActFilter,
       eaTypeFilter,
       envRegionFilter,
