@@ -45,16 +45,11 @@ import WarningBox from "../../shared/warningBox";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { setLoadingState } from "../../../services/loadingService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import {
-  COMMON_ERROR_MESSAGE,
-  ROLES,
-} from "../../../constants/application-constant";
-import { Restricted } from "components/shared/restricted";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { IButton } from "components/shared";
 import { showConfetti } from "styles/uiStateSlice";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
 
 const EventList = () => {
@@ -461,10 +456,16 @@ const EventList = () => {
         !(row.visibility === EventTemplateVisibility.MANDATORY)
     );
   };
+
+  const onAddTask = () => {
+    setShowTaskForm(true);
+  };
+
   const onAddMilestone = () => {
     setShowMilestoneForm(true);
     setShowDeleteMilestoneButton(false);
   };
+
   const getMilestoneEvent = async (eventId: number) => {
     try {
       const result = await eventService.getById(eventId);
@@ -768,6 +769,23 @@ const EventList = () => {
 
   return (
     <Grid container rowSpacing={1}>
+      <Grid item xs={12}>
+        <EventListTable
+          loading={loading}
+          events={events}
+          onRowClick={onRowClick}
+          rowSelection={rowSelection}
+          setRowSelection={setRowSelection}
+          templateAvailable={templateAvailable}
+          userIsActiveTeamMember={userIsActiveTeamMember}
+          handleExportToSheet={handleExportToSheet}
+          onAddTask={onAddTask}
+          onAddMilestone={onAddMilestone}
+          handleTaskFileUpload={handleTaskFileUpload}
+          setShowTemplateForm={setShowTemplateForm}
+          setShowDeleteDialog={setShowDeleteDialog}
+        />
+      </Grid>
       <Grid container>
         <When
           condition={
@@ -795,28 +813,6 @@ const EventList = () => {
         </When>
       </Grid>
       <Grid container item columnSpacing={2}>
-        <Grid item xs="auto">
-          <Restricted
-            allowed={[ROLES.CREATE]}
-            errorProps={{ disabled: true }}
-            exception={userIsActiveTeamMember}
-          >
-            <Button variant="contained" onClick={() => setShowTaskForm(true)}>
-              Add Task
-            </Button>
-          </Restricted>
-        </Grid>
-        <Grid item xs="auto">
-          <Restricted
-            allowed={[ROLES.CREATE]}
-            errorProps={{ disabled: true }}
-            exception={userIsActiveTeamMember}
-          >
-            <Button variant="outlined" onClick={onAddMilestone}>
-              Add Milestone
-            </Button>
-          </Restricted>
-        </Grid>
         <Grid
           item
           xs={8}
@@ -907,47 +903,7 @@ const EventList = () => {
               </IButton>
             </Tooltip>
           )}
-          <Tooltip title="Export workplan to excel">
-            <Restricted
-              allowed={[ROLES.EDIT]}
-              errorProps={{ disabled: true }}
-              exception={userIsActiveTeamMember}
-            >
-              <IButton onClick={handleExportToSheet}>
-                <DownloadIcon className="icon" />
-              </IButton>
-            </Restricted>
-          </Tooltip>
-          <Restricted
-            allowed={[ROLES.EXTENDED_EDIT]}
-            exception={userIsActiveTeamMember}
-          >
-            <Tooltip title="Import tasks from an excel sheet">
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<ImportFileIcon />}
-              >
-                Import from excel
-                <input
-                  type="file"
-                  hidden
-                  accept=".xls, .xlsx"
-                  onChange={handleTaskFileUpload}
-                />
-              </Button>
-            </Tooltip>
-          </Restricted>
         </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <EventListTable
-          loading={loading}
-          events={events}
-          onRowClick={onRowClick}
-          rowSelection={rowSelection}
-          setRowSelection={setRowSelection}
-        />
       </Grid>
       <TrackDialog
         open={showTaskForm}
