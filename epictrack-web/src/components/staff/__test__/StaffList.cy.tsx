@@ -79,11 +79,7 @@ describe("StaffList", () => {
     cy.mount(
       <SnackbarProvider maxSnack={3}>
         <Router>
-          <MasterContext.Provider
-            value={createMockMasterContext(staffs, staffs)}
-          >
-            <StaffList />
-          </MasterContext.Provider>
+          <StaffList />
         </Router>
       </SnackbarProvider>
     );

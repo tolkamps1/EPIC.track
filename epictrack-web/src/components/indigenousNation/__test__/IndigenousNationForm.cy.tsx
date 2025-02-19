@@ -49,13 +49,15 @@ const firstNation = [defaultFirstNation];
 
 describe("IndigenousNationForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(firstNation, firstNation);
     setupIntercepts(endpoints);
 
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <IndigenousNationForm />
-      </MasterContext.Provider>
+      <IndigenousNationForm
+        firstNation={null}
+        saveFirstNation={function (data: any): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
     );
   });
 

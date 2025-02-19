@@ -72,11 +72,7 @@ describe("ProponentList", () => {
     setupIntercepts(endpoints);
     cy.mount(
       <Router>
-        <MasterContext.Provider
-          value={createMockMasterContext(proponents, proponents)}
-        >
-          <ProponentList />
-        </MasterContext.Provider>
+        <ProponentList />
       </Router>
     );
   });

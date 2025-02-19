@@ -96,12 +96,17 @@ function createMockContext() {
 
 describe("ProponentForm", () => {
   beforeEach(() => {
-    const mockContext = createMockContext();
     setupIntercepts(endpoints);
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <ProponentForm />
-      </MasterContext.Provider>
+      <ProponentForm
+        proponent={null}
+        saveProponent={function (data: any): void {
+          throw new Error("Function not implemented.");
+        }}
+        setDisableDialogSave={function (disabled: boolean): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
     );
   });
 

@@ -1,9 +1,5 @@
-import { MasterContext } from "../../shared/MasterContext";
 import StaffForm from "../StaffForm";
-import {
-  createMockMasterContext,
-  mockStaffs,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
 import { setupIntercepts } from "../../../../cypress/support/utils";
 
@@ -55,13 +51,14 @@ const staffs = [staff1];
 
 describe("StaffForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(staffs, staffs);
     setupIntercepts(endpoints);
-
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <StaffForm staffId={staff1.id} />
-      </MasterContext.Provider>
+      <StaffForm
+        staff={staff1}
+        saveStaff={function (data: any): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
     );
   });
 
